@@ -1,6 +1,7 @@
 <?php
 
 use App\Assignment;
+use App\Http\Resources\AssignmentCollection;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,5 +19,6 @@ Route::get('/', function () {
 });
 
 Route::get('/assignments', function () {
-    return Assignment::paginate(15);
+    return new AssignmentCollection(Assignment::all());
 });
+
