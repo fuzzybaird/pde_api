@@ -22,3 +22,15 @@ Route::get('/assignments', function () {
     return new AssignmentCollection(Assignment::all());
 });
 
+Route::get('/authenticate', function()
+{
+    return Forrest::authenticate();
+});
+
+Route::get('/callback', function()
+{
+    Forrest::callback();
+
+    return Redirect::to('/');
+});
+
