@@ -36,7 +36,7 @@ return [
         'display'   => '',
         'immediate' => false,
         'state'     => '',
-        'scope'     => '',
+        'scope'     => 'full refresh_token',
         'prompt'    => '',
     ],
 
