@@ -8,7 +8,8 @@ return [
     /*
      * Options include WebServer or UserPassword
      */
-    'authentication' => 'WebServer',
+    //'authentication' => 'WebServer',
+    'authentication' => 'UserPassword',
 
     /*
      * Enter your credentials

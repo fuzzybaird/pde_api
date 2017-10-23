@@ -35,7 +35,8 @@ Route::get('/assignments', function () {
 
 Route::get('/authenticate', function()
 {
-    return Forrest::authenticate();
+    Forrest::authenticate();
+    return Redirect::to('/assignments');
 });
 
 Route::get('/callback', function()
