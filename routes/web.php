@@ -14,6 +14,42 @@ use App\Http\Resources\AssignmentCollection;
 |
 */
 
+/** Helper Functions - Will need to be moved to another location */
+function scrubSalesforceFieldName($field) {
+    $field = preg_replace(['/__[cr]$/'], [''], $field);
+    $field = strtolower($field);
+    return $field;
+}
+
+function scrubSalesforceFields($object) {
+    if (is_scalar($object)) return $object;
+
+    foreach ($object as $key => $value) {
+        unset($object[$key]);
+        $object[scrubSalesforceFieldName($key)] = scrubSalesforceFields($value);
+    }
+
+    unset($object['attributes']);
+    $object = renameFields($object);
+
+    return $object;
+}
+
+function renameFields($object) {
+    static $fieldMapping = ['owner' => 'contact'];
+
+    if (!is_array($object)) return $object;
+
+    foreach ($object as $key => $value) {
+        if (!array_key_exists($key, $fieldMapping)) continue;
+
+        unset($object[$key]);
+        $object[$fieldMapping[$key]] = $value;
+    }
+
+    return $object;
+}
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -21,12 +57,19 @@ Route::get('/', function () {
 Route::get('/assignments', function () {
     //return new AssignmentCollection(Assignment::all());
     //return Cache::remember(url('/assignments'), 3, function(){
-        $results = Forrest::query('SELECT Id, Name FROM Assignment__c LIMIT 5');
+        $SOQL = "SELECT Id, Name, Pipeline_State__c, Start_Date__c, End_Date__c,
+                   Client__r.Name, Client__r.City__c, Client__r.State__c, Client__r.ZipCode__c,
+                   Primary_Worksite__r.Name, Primary_Worksite__r.City__c, Primary_Worksite__r.State__c, Primary_Worksite__r.ZipCode__c, Primary_Worksite__r.Country__c,
+                   Owner.Name
+                 FROM Assignment__c
+                 LIMIT 5";
 
-        $return = ['total_size' => $results['totalSize'], 'results' => []];
+        $results = Forrest::query($SOQL);
+
+        $return = ['total_size' => $results['totalSize'], 'assignments' => []];
 
         foreach ($results['records'] as $key => $value) {
-            $return['results'][] = ['id' => $value['Id']];
+            $return['assignments'][] = scrubSalesforceFields($value);
         }
 
         return $return;
