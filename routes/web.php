@@ -22,7 +22,7 @@ function scrubSalesforceFieldName($field) {
 }
 
 function scrubSalesforceFields($object) {
-    if (is_scalar($object)) return $object;
+    if (!is_array($object)) return $object;
 
     foreach ($object as $key => $value) {
         unset($object[$key]);
@@ -60,12 +60,11 @@ Route::get('/assignments', function () {
         $SOQL = "SELECT Id, Name, Pipeline_State__c, Start_Date__c, End_Date__c,
                    Client__r.Name, Client__r.City__c, Client__r.State__c, Client__r.ZipCode__c,
                    Primary_Worksite__r.Name, Primary_Worksite__r.City__c, Primary_Worksite__r.State__c, Primary_Worksite__r.ZipCode__c, Primary_Worksite__r.Country__c,
-                   Owner.Name
+                   Owner.Name, Owner.Title, Owner.Phone, Owner.Email
                  FROM Assignment__c
                  LIMIT 5";
 
         $results = Forrest::query($SOQL);
-
         $return = ['total_size' => $results['totalSize'], 'assignments' => []];
 
         foreach ($results['records'] as $key => $value) {
