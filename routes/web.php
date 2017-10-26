@@ -2,6 +2,7 @@
 
 use App\Assignment;
 use App\Http\Resources\AssignmentCollection;
+use Omniphx\Forrest\Exceptions\MissingTokenException;
 
 /*
 |--------------------------------------------------------------------------
@@ -64,7 +65,16 @@ Route::get('/assignments', function () {
                  FROM Assignment__c
                  LIMIT 5";
 
-        $results = Forrest::query($SOQL);
+        // Just thought it would be nice not to have to hit url /authenticate 
+        // each time you want to use your queries. This can be abstracted
+        // to some middleware if you want it out of the controller.
+        try {
+            $results = Forrest::query($SOQL);
+        } catch (MissingTokenException $e) {
+            Forrest::authenticate();
+            $results = Forrest::query($SOQL);
+        }
+        
         $return = ['total_size' => $results['totalSize'], 'assignments' => []];
 
         foreach ($results['records'] as $key => $value) {
